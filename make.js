@@ -21,15 +21,6 @@ target.highlighter = function () {
 
   console.log('Bundling highlighter...');
 
-  rm('-rf', 'vendor/highlight.js');
-  mkdir('-p', 'vendor');
-  pushd('vendor');
-  exec('git clone https://github.com/highlightjs/highlight.js.git');
-  pushd('highlight.js');
-  exec('git checkout tags/9.18.1');
-  popd();
-  popd();
-
   bundleHighlighter('src/remark/highlighter.js');
 };
 
@@ -154,20 +145,27 @@ function bundleResources(target) {
 }
 
 function bundleHighlighter(target) {
-  var highlightjs = 'vendor/highlight.js/src/',
-    resources = {
+  var highlightjs = 'node_modules/highlight.js/';
+  var languages = ["c.js", "bash.js", "shell.js"];
+  var styles = ["tomorrow-night-bright.css"];
+  var resources = {
       HIGHLIGHTER_STYLES: JSON.stringify(
-        ls(highlightjs + 'styles/*.css').reduce(mapStyle, {}),
+        styles.map(function (style) {
+          return highlightjs + 'styles/' + style;
+        }).reduce(mapStyle, {}),
       ),
-      HIGHLIGHTER_ENGINE: cat(highlightjs + 'highlight.js'),
       HIGHLIGHTER_LANGUAGES: Array.prototype.sort
-        .call(ls(highlightjs + 'languages/*.js'), function (a, b) {
+        .call(languages.map(function (language) {
+          return highlightjs + 'lib/languages/' + language;
+        }), function (a, b) {
           // Other languages depend on cpp, so put it first
           return a.indexOf('cpp.js') !== -1 ? -1 : 0;
         })
         .map(function (file) {
           var language = path.basename(file, path.extname(file));
-          return '{name:"' + language + '",create:' + cat(file) + '}';
+          var contents = cat(file);
+          contents = contents.replace(/module\.exports = .*;/g, "");
+          return '{name:"' + language + '",create:' + contents + '}';
         })
         .join(','),
     };

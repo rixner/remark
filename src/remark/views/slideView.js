@@ -233,7 +233,7 @@ function highlightCodeBlocks (content, slideshow) {
     if (block.parentElement.tagName !== 'PRE') {
       utils.addClass(block, 'remark-inline-code');
       if (highlightInline) {
-        highlighter.engine.highlightBlock(block, '');
+        highlighter.engine.highlightElement(block, '');
       }
       return;
     }
@@ -243,7 +243,7 @@ function highlightCodeBlocks (content, slideshow) {
     }
 
     if (block.className !== '') {
-      highlighter.engine.highlightBlock(block, '  ');
+      highlighter.engine.highlightElement(block, '  ');
     }
 
     wrapLines(block);

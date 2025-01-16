@@ -1,11 +1,8 @@
 /* Automatically generated */
 
-var hljs = (function() {
-      var exports = {};
-      %HIGHLIGHTER_ENGINE%;
-      return exports;
-    }())
-  , languages = [%HIGHLIGHTER_LANGUAGES%]
+const hljs = require('highlight.js/lib/core');
+
+const languages = [%HIGHLIGHTER_LANGUAGES%]
   ;
 
 for (var i = 0; i < languages.length; ++i) {
