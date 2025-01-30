@@ -146,7 +146,7 @@ function bundleResources(target) {
 
 function bundleHighlighter(target) {
   var highlightjs = 'node_modules/highlight.js/';
-  var languages = ["c.js", "bash.js", "shell.js"];
+  var languages = ["c.js", "bash.js", "shell.js", "python.js"];
   var styles = ["tomorrow-night-bright.css"];
   var resources = {
       HIGHLIGHTER_STYLES: JSON.stringify(
