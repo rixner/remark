@@ -1,6 +1,6 @@
 var sinon = require('sinon')
   , EventEmitter = require('events').EventEmitter
-  , TestDom = require('../../test_dom')
+  , Dom = require('../../../src/remark/dom')
   , Controller = require('../../../src/remark/controllers/defaultController')
   ;
 
@@ -188,7 +188,7 @@ describe('Controller', function () {
     events = new EventEmitter();
     sinon.spy(events, 'emit');
 
-    dom = new TestDom();
+    dom = new Dom();
   });
 
   afterEach(function () {

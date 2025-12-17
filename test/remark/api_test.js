@@ -1,20 +1,22 @@
 var Api = require('../../src/remark/api')
-  , TestDom = require('../test_dom')
+  , Dom = require('../../src/remark/dom')
   , highlighter = require('../../src/remark/highlighter')
   , Slideshow = require('../../src/remark/models/slideshow')
   ;
+
+require('../../src/remark'); // Triggers window.remark assignment
 
 describe('API', function () {
   var api,
       dom;
 
   beforeEach(function () {
-    dom = new TestDom();
+    dom = new Dom();
     api = new Api(dom);
   });
 
   it('should be exposed', function () {
-    window.should.have.property('remark');
+    should(window).have.property('remark');
   });
 
   it('should expose highlighter', function () {

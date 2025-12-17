@@ -39,11 +39,18 @@ function styleDocument () {
 }
 
 function setPageSize (size) {
-  var stylesheet = getRemarkStylesheet()
-    , pageRule = getPageRule(stylesheet)
+  var stylesheet = getRemarkStylesheet();
+  
+  if (!stylesheet) {
+    return;
+  }
+
+  var pageRule = getPageRule(stylesheet)
     ;
 
-  pageRule.style.size = size;
+  if (pageRule) {
+    pageRule.style.size = size;
+  }
 }
 
 // Locates the embedded remark stylesheet
@@ -59,7 +66,7 @@ function getRemarkStylesheet () {
 
 // Locates the CSS @page rule
 function getPageRule (stylesheet) {
-  var i, l = stylesheet.cssRules.length;
+  var i, l = (stylesheet.cssRules || []).length;
 
   for (i = 0; i < l; ++i) {
     if (stylesheet.cssRules[i] instanceof window.CSSPageRule) {

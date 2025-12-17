@@ -36,6 +36,15 @@ function convertMarkdown (content, links, insideContentClass) {
     }
   }
 
+  // Append link definitions to ensure Lexer recognizes references
+  if (links) {
+    markdown += '\n\n';
+    Object.keys(links).forEach(function (key) {
+      var link = links[key];
+      markdown += '[' + key + ']: ' + link.href + (link.title ? ' "' + link.title + '"' : '') + '\n';
+    });
+  }
+
   var tokens = marked.Lexer.lex(markdown.replace(/^\s+/, ''), {
     gfm: true,
     breaks: false,

@@ -1,4 +1,4 @@
-var SlideNumber = require('components/slide-number');
+var SlideNumber = require('../../../src/remark/components/slide-number/slide-number');
 
 describe('Slide number', function () {
   var slideNumber;

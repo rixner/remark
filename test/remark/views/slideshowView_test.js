@@ -1,5 +1,5 @@
 var EventEmitter = require('events').EventEmitter
-  , TestDom = require('../../test_dom')
+  , Dom = require('../../../src/remark/dom')
   , SlideshowView = require('../../../src/remark/views/slideshowView')
   , Slideshow = require('../../../src/remark/models/slideshow')
   , utils = require('../../../src/remark/utils')
@@ -16,7 +16,7 @@ describe('SlideshowView', function () {
 
   beforeEach(function () {
     events = new EventEmitter();
-    dom = new TestDom();
+    dom = new Dom();
     model = new Slideshow(events, dom);
     containerElement = document.createElement('div');
     options = { container: containerElement };
