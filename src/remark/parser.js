@@ -38,7 +38,7 @@ function Parser () { }
 Parser.prototype.parse = function (src, macros, options) {
   var self = this,
       lexer = new Lexer(),
-      tokens = lexer.lex(cleanInput(src)),
+      tokens = lexer.lex(cleanInput(src, options)),
       slides = [],
 
       // The last item on the stack contains the current slide or
@@ -199,7 +199,14 @@ function extractProperties (source, properties) {
   return source;
 }
 
-function cleanInput(source) {
+function cleanInput(source, options) {
+  var tabReplacements = (options || {}).tabReplacements || 4;
+
+  // Normalize leading tabs to spaces
+  source = source.replace(/^[ \t]+/gm, function (match) {
+    return match.replace(/\t/g, new Array(tabReplacements + 1).join(' '));
+  });
+
   // If all lines are indented, we should trim them all to the same point so that code doesn't
   // need to start at column 0 in the source (see GitHub Issue #105)
 
@@ -213,11 +220,16 @@ function cleanInput(source) {
 
   // Calculate the minimum leading whitespace
   // Ensure there's at least one char that's not newline nor whitespace to ignore empty and blank lines
-  var leadingWhitespacePattern = /^([ \t]*)[^ \t\n]/gm;
+  var leadingWhitespacePattern = /^([ ]*)[^ \n]/gm;
   var whitespace = getMatchCaptures(source, leadingWhitespacePattern).map(function (s) { return s.length; });
   var minWhitespace = Math.min.apply(Math, whitespace);
+  
+  // If no lines match (empty file or all blank lines), don't strip anything
+  if (whitespace.length === 0) {
+      return source;
+  }
 
   // Trim off the exact amount of whitespace, or less for blank lines (non-empty)
-  var trimWhitespacePattern = new RegExp('^[ \\t]{0,' + minWhitespace + '}', 'gm');
+  var trimWhitespacePattern = new RegExp('^[ ]{0,' + minWhitespace + '}', 'gm');
   return source.replace(trimWhitespacePattern, '');
 }

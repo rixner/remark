@@ -3,19 +3,7 @@ var marked = require('marked')
   , element = document.createElement('div')
   ;
 
-marked.setOptions({
-  gfm: true,
-  tables: true,
-  breaks: false,
 
-  // Without this set to true, converting something like
-  // <p>*</p><p>*</p> will become <p><em></p><p></em></p>
-  pedantic: true,
-
-  sanitize: false,
-  smartLists: true,
-  langPrefix: ''
-});
 
 converter.convertMarkdown = function (content, links, inline) {
   element.innerHTML = convertMarkdown(content, links || {}, inline);
@@ -25,22 +13,53 @@ converter.convertMarkdown = function (content, links, inline) {
 
 function convertMarkdown (content, links, insideContentClass) {
   var i, tag, markdown = '', html;
+  var placeholders = {};
+  var placeholderCount = 0;
 
   for (i = 0; i < content.length; ++i) {
     if (typeof content[i] === 'string') {
       markdown += content[i];
     }
     else {
+      var innerHtml = '';
       tag = content[i].block ? 'div' : 'span';
-      markdown += '<' + tag + ' class="' + content[i].class + '">';
-      markdown += convertMarkdown(content[i].content, links, !content[i].block);
-      markdown += '</' + tag + '>';
+      innerHtml += '<' + tag + ' class="' + content[i].class + '">';
+      innerHtml += convertMarkdown(content[i].content, links, !content[i].block);
+      innerHtml += '</' + tag + '>';
+      
+      var key = '@REMARK_PLACEHOLDER_' + (placeholderCount++) + '@';
+      placeholders[key] = {
+        html: innerHtml,
+        block: content[i].block
+      };
+      markdown += key;
     }
   }
 
-  var tokens = marked.Lexer.lex(markdown.replace(/^\s+/, ''));
-  tokens.links = links;
+  var tokens = marked.Lexer.lex(markdown.replace(/^\s+/, ''), {
+    gfm: true,
+    breaks: false,
+    smartLists: true,
+    pedantic: false,
+    sanitize: false
+  });
+  tokens.links = links || {};
   html = marked.Parser.parse(tokens);
+
+  // Restore placeholders
+  Object.keys(placeholders).forEach(function (key) {
+    var val = placeholders[key];
+    
+    // If it was a block and marked wrapped it in <p>, unwrap it
+    if (val.block) {
+       var pRegex = new RegExp('<p>\\s*' + key + '\\s*<\\/p>', 'g');
+       html = html.replace(pRegex, val.html);
+    }
+    
+    // Replace any remaining occurrences
+    // Use split/join to replace all instances safely without regex meta-char issues in key
+    html = html.split(key).join(val.html);
+  });
 
   if (insideContentClass) {
     element.innerHTML = html;
