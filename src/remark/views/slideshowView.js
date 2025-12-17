@@ -36,7 +36,7 @@ function SlideshowView (events, dom, options, slideshow) {
     // To make sure that there is only one element fading at a time,
     // remove the fading class from all slides before hiding
     // the new slide.
-    self.elementArea.getElementsByClassName('remark-fading').forEach(function (slide) {
+    Array.from(self.elementArea.getElementsByClassName('remark-fading')).forEach(function (slide) {
       utils.removeClass(slide, 'remark-fading');
     });
     self.hideSlide(slideIndex);

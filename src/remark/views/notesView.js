@@ -60,7 +60,7 @@ NotesView.prototype.configureElements = function () {
     }
   };
 
-  self.toolbarElement.getElementsByTagName('a').forEach(function (link) {
+  Array.from(self.toolbarElement.getElementsByTagName('a')).forEach(function (link) {
     link.addEventListener('click', function (e) {
       var command = e.target.hash.substr(1);
       commands[command]();

@@ -165,20 +165,7 @@ function styleContentElement (slideshow, element, properties) {
   element.className = '';
 
   setClassFromProperties(element, properties);
-  setHighlightStyleFromProperties(element, properties, slideshow);
   setBackgroundFromProperties(element, properties);
-}
-
-function createNotesElement (slideshow, notes) {
-  var element = document.createElement('div');
-
-  element.className = 'remark-slide-notes';
-
-  element.innerHTML = converter.convertMarkdown(notes, slideshow.getLinks());
-
-  highlightCodeBlocks(element, slideshow);
-
-  return element;
 }
 
 function setBackgroundFromProperties (element, properties) {
@@ -201,13 +188,16 @@ function setBackgroundFromProperties (element, properties) {
   }
 }
 
-function setHighlightStyleFromProperties (element, properties, slideshow) {
-  var highlightStyle = properties['highlight-style'] ||
-      slideshow.getHighlightStyle();
+function createNotesElement (slideshow, notes) {
+  var element = document.createElement('div');
 
-  if (highlightStyle) {
-    utils.addClass(element, 'hljs-' + highlightStyle);
-  }
+  element.className = 'remark-slide-notes';
+
+  element.innerHTML = converter.convertMarkdown(notes, slideshow.getLinks());
+
+  highlightCodeBlocks(element, slideshow);
+
+  return element;
 }
 
 function setClassFromProperties (element, properties) {
@@ -225,7 +215,7 @@ function highlightCodeBlocks (content, slideshow) {
       highlightInline = slideshow.getHighlightInlineCode(),
       meta;
 
-  codeBlocks.forEach(function (block) {
+  Array.from(codeBlocks).forEach(function (block) {
     if (block.className === '') {
       block.className = slideshow.getHighlightLanguage();
     }
@@ -316,7 +306,7 @@ function highlightBlockSpans (block, highlightSpans) {
     throw new Error('Illegal value for `highlightSpans`');
   }
 
-  block.childNodes.forEach(function (element) {
+  Array.from(block.childNodes).forEach(function (element) {
     element.innerHTML = element.innerHTML.replace(pattern,
       function (m,e,c) {
         if (e === '\\') {

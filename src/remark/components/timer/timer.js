@@ -1,12 +1,11 @@
 var utils = require('../../utils');
-var extend = require('extend');
 
 module.exports = TimerViewModel;
 
 function TimerViewModel(events, element, options) {
   var self = this;
 
-  self.options = extend({}, { enabled: true, resetable: true, startOnChange: true, formatter: defaultFormatter }, options || {});
+  self.options = Object.assign({}, { enabled: true, resetable: true, startOnChange: true, formatter: defaultFormatter }, options || {});
   self.element = element;
   self.reset();
 
