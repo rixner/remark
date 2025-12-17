@@ -17,10 +17,9 @@ Keyboard.prototype.deactivate = function () {
 };
 
 Keyboard.prototype.addKeyboardEventListeners = function () {
-  var self = this;
   var events = this._events;
 
-  events.on('keydown', function (event) {
+  events.on('keydown', (event) => {
     if (event.metaKey || event.ctrlKey || event.altKey) {
       // Bail out if alt, meta or ctrl key was pressed
       return;
@@ -33,9 +32,10 @@ Keyboard.prototype.addKeyboardEventListeners = function () {
         events.emit('gotoPreviousSlide');
         break;
       case 32: // Space
-        if(event.shiftKey){ // Shift+Space
+        if (event.shiftKey) {
+          // Shift+Space
           events.emit('gotoPreviousSlide');
-        }else{
+        } else {
           events.emit('gotoNextSlide');
         }
         break;
@@ -54,15 +54,15 @@ Keyboard.prototype.addKeyboardEventListeners = function () {
         events.emit('hideOverlay');
         break;
       case 13: // Return
-        if (self._gotoSlideNumber) {
-          events.emit('gotoSlideNumber', self._gotoSlideNumber);
-          self._gotoSlideNumber = '';
+        if (this._gotoSlideNumber) {
+          events.emit('gotoSlideNumber', this._gotoSlideNumber);
+          this._gotoSlideNumber = '';
         }
         break;
     }
   });
 
-  events.on('keypress', function (event) {
+  events.on('keypress', (event) => {
     if (event.metaKey || event.ctrlKey) {
       // Bail out if meta or ctrl key was pressed
       return;
@@ -109,7 +109,7 @@ Keyboard.prototype.addKeyboardEventListeners = function () {
       case '8':
       case '9':
       case '0':
-        self._gotoSlideNumber += key;
+        this._gotoSlideNumber += key;
         break;
       case 'h':
       case '?':
@@ -121,13 +121,12 @@ Keyboard.prototype.addKeyboardEventListeners = function () {
 
     if (tryToPreventDefault && event && event.preventDefault)
       event.preventDefault();
-
   });
 };
 
 Keyboard.prototype.removeKeyboardEventListeners = function () {
   var events = this._events;
 
-  events.removeAllListeners("keydown");
-  events.removeAllListeners("keypress");
+  events.removeAllListeners('keydown');
+  events.removeAllListeners('keypress');
 };

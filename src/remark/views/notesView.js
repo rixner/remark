@@ -2,66 +2,66 @@ var converter = require('../converter');
 
 module.exports = NotesView;
 
-function NotesView (events, element, slideViewsAccessor) {
-  var self = this;
+function NotesView(events, element, slideViewsAccessor) {
+  this.events = events;
+  this.element = element;
+  this.slideViewsAccessor = slideViewsAccessor;
 
-  self.events = events;
-  self.element = element;
-  self.slideViewsAccessor = slideViewsAccessor;
+  this.configureElements();
 
-  self.configureElements();
-
-  events.on('showSlide', function (slideIndex) {
-    self.showSlide(slideIndex);
+  events.on('showSlide', (slideIndex) => {
+    this.showSlide(slideIndex);
   });
 }
 
 NotesView.prototype.showSlide = function (slideIndex) {
-  var self = this
-    , slideViews = self.slideViewsAccessor()
-    , slideView = slideViews[slideIndex]
-    , nextSlideView = slideViews[slideIndex + 1]
-    ;
+  var slideViews = this.slideViewsAccessor(),
+    slideView = slideViews[slideIndex],
+    nextSlideView = slideViews[slideIndex + 1];
 
-  self.notesElement.innerHTML = slideView.notesElement.innerHTML;
+  this.notesElement.innerHTML = slideView.notesElement.innerHTML;
 
   if (nextSlideView) {
-    self.notesPreviewElement.innerHTML = nextSlideView.notesElement.innerHTML;
-  }
-  else {
-    self.notesPreviewElement.innerHTML = '';
+    this.notesPreviewElement.innerHTML = nextSlideView.notesElement.innerHTML;
+  } else {
+    this.notesPreviewElement.innerHTML = '';
   }
 };
 
 NotesView.prototype.configureElements = function () {
-  var self = this;
+  this.notesElement = this.element.getElementsByClassName('remark-notes')[0];
+  this.notesPreviewElement = this.element.getElementsByClassName(
+    'remark-notes-preview'
+  )[0];
 
-  self.notesElement = self.element.getElementsByClassName('remark-notes')[0];
-  self.notesPreviewElement = self.element.getElementsByClassName('remark-notes-preview')[0];
-
-  self.notesElement.addEventListener('mousewheel', function (event) {
+  this.notesElement.addEventListener('mousewheel', (event) => {
     event.stopPropagation();
   });
 
-  self.notesPreviewElement.addEventListener('mousewheel', function (event) {
+  this.notesPreviewElement.addEventListener('mousewheel', (event) => {
     event.stopPropagation();
   });
 
-  self.toolbarElement = self.element.getElementsByClassName('remark-toolbar')[0];
+  this.toolbarElement =
+    this.element.getElementsByClassName('remark-toolbar')[0];
 
   var commands = {
-    increase: function () {
-      self.notesElement.style.fontSize = (parseFloat(self.notesElement.style.fontSize) || 1) + 0.1 + 'em';
-      self.notesPreviewElement.style.fontsize = self.notesElement.style.fontSize;
+    increase: () => {
+      this.notesElement.style.fontSize =
+        (parseFloat(this.notesElement.style.fontSize) || 1) + 0.1 + 'em';
+      this.notesPreviewElement.style.fontsize =
+        this.notesElement.style.fontSize;
     },
-    decrease: function () {
-      self.notesElement.style.fontSize = (parseFloat(self.notesElement.style.fontSize) || 1) - 0.1 + 'em';
-      self.notesPreviewElement.style.fontsize = self.notesElement.style.fontSize;
+    decrease: () => {
+      this.notesElement.style.fontSize =
+        (parseFloat(this.notesElement.style.fontSize) || 1) - 0.1 + 'em';
+      this.notesPreviewElement.style.fontsize =
+        this.notesElement.style.fontSize;
     }
   };
 
-  Array.from(self.toolbarElement.getElementsByTagName('a')).forEach(function (link) {
-    link.addEventListener('click', function (e) {
+  Array.from(this.toolbarElement.getElementsByTagName('a')).forEach((link) => {
+    link.addEventListener('click', (e) => {
       var command = e.target.hash.substr(1);
       commands[command]();
       e.preventDefault();

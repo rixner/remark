@@ -3,14 +3,13 @@
 
 module.exports = Controller;
 
-var Keyboard = require('./inputs/keyboard')
-  , mouse = require('./inputs/mouse')
-  , touch = require('./inputs/touch')
-  , message = require('./inputs/message')
-  , location = require('./inputs/location')
-  ;
+var Keyboard = require('./inputs/keyboard'),
+  mouse = require('./inputs/mouse'),
+  touch = require('./inputs/touch'),
+  message = require('./inputs/message'),
+  location = require('./inputs/location');
 
-function Controller (events, dom, slideshowView, options) {
+function Controller(events, dom, slideshowView, options) {
   options = options || {};
 
   var keyboard = new Keyboard(events);
@@ -23,14 +22,14 @@ function Controller (events, dom, slideshowView, options) {
   addApiEventListeners(events, keyboard, slideshowView, options);
 }
 
-function addApiEventListeners (events, keyboard, slideshowView, options) {
-  events.on('pause', function(event) {
+function addApiEventListeners(events, keyboard, slideshowView, options) {
+  events.on('pause', (event) => {
     keyboard.deactivate();
     mouse.unregister(events);
     touch.unregister(events);
   });
 
-  events.on('resume',  function(event) {
+  events.on('resume', (event) => {
     keyboard.activate();
     mouse.register(events, options);
     touch.register(events, options);

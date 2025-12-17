@@ -1,18 +1,16 @@
-var Navigation = require('./slideshow/navigation')
-  , Events = require('./slideshow/events')
-  , utils = require('../utils')
-  , Slide = require('./slide')
-  , Parser = require('../parser')
-  , macros = require('../macros')
-  ;
+var Navigation = require('./slideshow/navigation'),
+  Events = require('./slideshow/events'),
+  utils = require('../utils'),
+  Slide = require('./slide'),
+  Parser = require('../parser'),
+  macros = require('../macros');
 
 module.exports = Slideshow;
 
-function Slideshow (events, dom, options, callback) {
-  var self = this
-    , slides = []
-    , links = {}
-    ;
+function Slideshow(events, dom, options, callback) {
+  var self = this,
+    slides = [],
+    links = {};
 
   slides.byName = {};
   options = options || {};
@@ -44,10 +42,13 @@ function Slideshow (events, dom, options, callback) {
   self.getHighlightSpans = getOrDefault('highlightSpans', false);
   self.getHighlightInlineCode = getOrDefault('highlightInlineCode', false);
   self.getHighlightLanguage = getOrDefault('highlightLanguage', '');
-  self.getSlideNumberFormat = getOrDefault('slideNumberFormat', '%current% / %total%');
+  self.getSlideNumberFormat = getOrDefault(
+    'slideNumberFormat',
+    '%current% / %total%'
+  );
   self.getCloneTarget = getOrDefault('cloneTarget', '_blank');
 
-  events.on('toggleBlackout', function (opts) {
+  events.on('toggleBlackout', (opts) => {
     if (opts && opts.propagate === false) return;
 
     if (self.clone && !self.clone.closed) {
@@ -61,22 +62,21 @@ function Slideshow (events, dom, options, callback) {
 
   if (options.sourceUrl) {
     loadFromUrl(options.sourceUrl, callback);
-  }
-  else {
+  } else {
     loadFromString(options.source);
     if (typeof callback === 'function') {
       callback(self);
     }
   }
 
-  function loadFromString (source) {
+  function loadFromString(source) {
     source = source || '';
 
     slides = createSlides(source, options);
     expandVariables(slides);
 
     links = {};
-    slides.forEach(function (slide) {
+    slides.forEach((slide) => {
       for (var id in slide.links) {
         if (slide.links.hasOwnProperty(id)) {
           links[id] = slide.links[id];
@@ -87,10 +87,10 @@ function Slideshow (events, dom, options, callback) {
     events.emit('slidesChanged');
   }
 
-  function loadFromUrl (url, callback) {
+  function loadFromUrl(url, callback) {
     var xhr = new dom.XMLHttpRequest();
     xhr.open('GET', options.sourceUrl, true);
-    xhr.onload = function (e) {
+    xhr.onload = (e) => {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
           options.source = xhr.responseText.replace(/\r\n/g, '\n');
@@ -103,46 +103,46 @@ function Slideshow (events, dom, options, callback) {
         }
       }
     };
-    xhr.onerror = function (e) {
+    xhr.onerror = (e) => {
       throw Error(xhr.statusText);
     };
     xhr.send(null);
     return xhr;
   }
 
-  function update () {
+  function update() {
     events.emit('resize');
   }
 
-  function getLinks () {
+  function getLinks() {
     return links;
   }
 
-  function getSlides () {
-    return slides.map(function (slide) { return slide; });
+  function getSlides() {
+    return slides.map((slide) => slide);
   }
 
-  function getSlideCount () {
+  function getSlideCount() {
     return slides.length;
   }
 
-  function getSlideByName (name) {
+  function getSlideByName(name) {
     return slides.byName[name];
   }
 
-  function getSlidesByNumber (number) {
+  function getSlidesByNumber(number) {
     return slides.byNumber[number];
   }
 
-  function togglePresenterMode () {
+  function togglePresenterMode() {
     events.emit('togglePresenterMode');
   }
 
-  function toggleHelp () {
+  function toggleHelp() {
     events.emit('toggleHelp');
   }
 
-  function toggleBlackout () {
+  function toggleBlackout() {
     events.emit('toggleBlackout');
   }
 
@@ -150,20 +150,20 @@ function Slideshow (events, dom, options, callback) {
     events.emit('toggleMirrored');
   }
 
-  function toggleFullscreen () {
+  function toggleFullscreen() {
     events.emit('toggleFullscreen');
   }
 
-  function createClone () {
+  function createClone() {
     events.emit('createClone');
   }
 
-  function resetTimer () {
+  function resetTimer() {
     events.emit('resetTimer');
   }
 
-  function getOrDefault (key, defaultValue) {
-    return function () {
+  function getOrDefault(key, defaultValue) {
+    return () => {
       if (options[key] === undefined) {
         return defaultValue;
       }
@@ -173,56 +173,67 @@ function Slideshow (events, dom, options, callback) {
   }
 }
 
-function createSlides (slideshowSource, options) {
-  var parser = new Parser()
-   ,  parsedSlides = parser.parse(slideshowSource, macros, options)
-    , slides = []
-    , byName = {}
-    , layoutSlide
-    ;
+function createSlides(slideshowSource, options) {
+  var parser = new Parser(),
+    parsedSlides = parser.parse(slideshowSource, macros, options),
+    slides = [],
+    byName = {},
+    layoutSlide;
 
   slides.byName = {};
   slides.byNumber = {};
 
   var slideNumber = 0;
-  parsedSlides.forEach(function (slide, i) {
+  parsedSlides.forEach((slide, i) => {
     var template, slideViewModel;
 
     if (slide.properties.continued === 'true' && i > 0) {
       template = slides[slides.length - 1];
-    }
-    else if (byName[slide.properties.template]) {
+    } else if (byName[slide.properties.template]) {
       template = byName[slide.properties.template];
-    }
-    else if (slide.properties.layout === 'false') {
+    } else if (slide.properties.layout === 'false') {
       layoutSlide = undefined;
-    }
-    else if (layoutSlide && slide.properties.layout !== 'true') {
+    } else if (layoutSlide && slide.properties.layout !== 'true') {
       template = layoutSlide;
     }
 
-    if (slide.properties.continued === 'true' &&
-        options.countIncrementalSlides === false &&
-        slide.properties.count === undefined) {
+    if (
+      slide.properties.continued === 'true' &&
+      options.countIncrementalSlides === false &&
+      slide.properties.count === undefined
+    ) {
       slide.properties.count = 'false';
     }
 
-    var slideClasses = (slide.properties['class'] || '').split(/,| /)
-      , excludedClasses = options.excludedClasses || []
-      , slideIsIncluded = slideClasses.filter(function (c) {
-          return excludedClasses.indexOf(c) !== -1;
-        }).length === 0;
+    var slideClasses = (slide.properties['class'] || '').split(/,| /),
+      excludedClasses = options.excludedClasses || [],
+      slideIsIncluded =
+        slideClasses.filter((c) => excludedClasses.indexOf(c) !== -1).length ===
+        0;
 
-    if (slideIsIncluded && slide.properties.layout !== 'true' && slide.properties.count !== 'false') {
+    if (
+      slideIsIncluded &&
+      slide.properties.layout !== 'true' &&
+      slide.properties.count !== 'false'
+    ) {
       slideNumber++;
       slides.byNumber[slideNumber] = [];
     }
 
-    if (options.includePresenterNotes !== undefined && !options.includePresenterNotes) {
+    if (
+      options.includePresenterNotes !== undefined &&
+      !options.includePresenterNotes
+    ) {
       slide.notes = '';
     }
 
-    slideViewModel = new Slide(slides.length, slideNumber, slide, template, options);
+    slideViewModel = new Slide(
+      slides.length,
+      slideNumber,
+      slide,
+      template,
+      options
+    );
 
     if (slide.properties.name) {
       byName[slide.properties.name] = slideViewModel;
@@ -241,14 +252,13 @@ function createSlides (slideshowSource, options) {
         slides.byName[slide.properties.name] = slideViewModel;
       }
     }
-
   });
 
   return slides;
 }
 
-function expandVariables (slides) {
-  slides.forEach(function (slide) {
+function expandVariables(slides) {
+  slides.forEach((slide) => {
     slide.expandVariables();
   });
 }

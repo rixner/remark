@@ -1,20 +1,13 @@
 var SlideNumber = require('../../../src/remark/components/slide-number/slide-number');
 
-describe('Slide number', function () {
+describe('Slide number', () => {
   var slideNumber;
 
-  it('should display according to format', function () {
-    var slide = createSlide(1)
-      , slideshow = {
-          getSlideNumberFormat: function () {
-            return '%current% / %total%';
-          }
-        , getSlides: function () { return [
-            createSlide(0),
-            slide,
-            createSlide(2)
-          ];
-        }
+  it('should display according to format', () => {
+    var slide = createSlide(1),
+      slideshow = {
+        getSlideNumberFormat: () => '%current% / %total%',
+        getSlides: () => [createSlide(0), slide, createSlide(2)]
       };
 
     slideNumber = new SlideNumber(slide, slideshow);
@@ -22,11 +15,11 @@ describe('Slide number', function () {
     slideNumber.element.innerHTML.should.equal('2 / 3');
   });
 
-  function createSlide (index) {
+  function createSlide(index) {
     return {
-      getSlideIndex: function () { return index; },
-      getSlideNumber: function () { return index + 1; },
+      getSlideIndex: () => index,
+      getSlideNumber: () => index + 1,
       properties: {}
-    }
+    };
   }
 });

@@ -1,33 +1,36 @@
-var marked = require('marked')
-  , converter = module.exports = {}
-  , element = document.createElement('div')
-  ;
+var marked = require('marked'),
+  converter = (module.exports = {}),
+  element = document.createElement('div');
 
-
-
-converter.convertMarkdown = function (content, links, inline) {
+converter.convertMarkdown = (content, links, inline) => {
   element.innerHTML = convertMarkdown(content, links || {}, inline);
   element.innerHTML = element.innerHTML.replace(/<p>\s*<\/p>/g, '');
   return element.innerHTML.replace(/\n\r?$/, '');
 };
 
-function convertMarkdown (content, links, insideContentClass) {
-  var i, tag, markdown = '', html;
+function convertMarkdown(content, links, insideContentClass) {
+  var i,
+    tag,
+    markdown = '',
+    html;
   var placeholders = {};
   var placeholderCount = 0;
 
   for (i = 0; i < content.length; ++i) {
     if (typeof content[i] === 'string') {
       markdown += content[i];
-    }
-    else {
+    } else {
       var innerHtml = '';
       tag = content[i].block ? 'div' : 'span';
       innerHtml += '<' + tag + ' class="' + content[i].class + '">';
-      innerHtml += convertMarkdown(content[i].content, links, !content[i].block);
+      innerHtml += convertMarkdown(
+        content[i].content,
+        links,
+        !content[i].block
+      );
       innerHtml += '</' + tag + '>';
-      
-      var key = '@REMARK_PLACEHOLDER_' + (placeholderCount++) + '@';
+
+      var key = '@REMARK_PLACEHOLDER_' + placeholderCount++ + '@';
       placeholders[key] = {
         html: innerHtml,
         block: content[i].block
@@ -39,9 +42,15 @@ function convertMarkdown (content, links, insideContentClass) {
   // Append link definitions to ensure Lexer recognizes references
   if (links) {
     markdown += '\n\n';
-    Object.keys(links).forEach(function (key) {
+    Object.keys(links).forEach((key) => {
       var link = links[key];
-      markdown += '[' + key + ']: ' + link.href + (link.title ? ' "' + link.title + '"' : '') + '\n';
+      markdown +=
+        '[' +
+        key +
+        ']: ' +
+        link.href +
+        (link.title ? ' "' + link.title + '"' : '') +
+        '\n';
     });
   }
 
@@ -56,15 +65,15 @@ function convertMarkdown (content, links, insideContentClass) {
   html = marked.Parser.parse(tokens);
 
   // Restore placeholders
-  Object.keys(placeholders).forEach(function (key) {
+  Object.keys(placeholders).forEach((key) => {
     var val = placeholders[key];
-    
+
     // If it was a block and marked wrapped it in <p>, unwrap it
     if (val.block) {
-       var pRegex = new RegExp('<p>\\s*' + key + '\\s*<\\/p>', 'g');
-       html = html.replace(pRegex, val.html);
+      var pRegex = new RegExp('<p>\\s*' + key + '\\s*<\\/p>', 'g');
+      html = html.replace(pRegex, val.html);
     }
-    
+
     // Replace any remaining occurrences
     // Use split/join to replace all instances safely without regex meta-char issues in key
     html = html.split(key).join(val.html);

@@ -2,36 +2,34 @@ var converter = require('../converter');
 
 module.exports = Slide;
 
-function Slide (slideIndex, slideNumber, slide, template, options) {
-  var self = this;
+function Slide(slideIndex, slideNumber, slide, template, options) {
+  this.properties = slide.properties || {};
+  this.links = slide.links || {};
+  this.content = slide.content || [];
+  this.notes = slide.notes || '';
 
-  self.properties = slide.properties || {};
-  self.links = slide.links || {};
-  self.content = slide.content || [];
-  self.notes = slide.notes || '';
-
-  self.getSlideIndex = function () { return slideIndex; };
-  self.getSlideNumber = function () { return slideNumber; };
+  this.getSlideIndex = () => slideIndex;
+  this.getSlideNumber = () => slideNumber;
 
   if (template) {
-    inherit(self, template, options);
+    inherit(this, template, options);
   }
 }
 
-function inherit (slide, template, options) {
+function inherit(slide, template, options) {
   inheritProperties(slide, template);
   inheritContent(slide, template);
   inheritNotes(slide, template, options);
 }
 
-function inheritProperties (slide, template) {
-  var property
-    , value
-    ;
+function inheritProperties(slide, template) {
+  var property, value;
 
   for (property in template.properties) {
-    if (!template.properties.hasOwnProperty(property) ||
-        ignoreProperty(property)) {
+    if (
+      !template.properties.hasOwnProperty(property) ||
+      ignoreProperty(property)
+    ) {
       continue;
     }
 
@@ -47,13 +45,11 @@ function inheritProperties (slide, template) {
   }
 }
 
-function ignoreProperty (property) {
-  return property === 'name' ||
-    property === 'layout' ||
-    property === 'count';
+function ignoreProperty(property) {
+  return property === 'name' || property === 'layout' || property === 'count';
 }
 
-function inheritContent (slide, template) {
+function inheritContent(slide, template) {
   var expandedVariables;
 
   slide.properties.content = slide.content.slice();
@@ -75,44 +71,47 @@ function deepCopyContent(target, content) {
   for (i = 0; i < content.length; ++i) {
     if (typeof content[i] === 'string') {
       target.content.push(content[i]);
-    }
-    else {
+    } else {
       target.content.push({
         block: content[i].block,
-        class: content[i].class,
+        class: content[i].class
       });
-      deepCopyContent(target.content[target.content.length-1], content[i].content);
+      deepCopyContent(
+        target.content[target.content.length - 1],
+        content[i].content
+      );
     }
   }
 }
 
-function inheritNotes (slide, template, options) {
+function inheritNotes(slide, template, options) {
   if (template.notes && options.inheritPresenterNotes) {
     slide.notes = template.notes + '\n\n' + slide.notes;
   }
 }
 
-Slide.prototype.expandVariables = function (contentOnly, content, expandResult) {
-  var properties = this.properties
-    , i
-    ;
+Slide.prototype.expandVariables = function (
+  contentOnly,
+  content,
+  expandResult
+) {
+  var properties = this.properties,
+    i;
 
   content = content !== undefined ? content : this.content;
   expandResult = expandResult || {};
 
   for (i = 0; i < content.length; ++i) {
     if (typeof content[i] === 'string') {
-      content[i] = content[i].replace(/(\\)?(\{\{([^\}\n]+)\}\})/g, expand);
-    }
-    else {
+      content[i] = content[i].replace(/(\\)?(\{\{([^}\n]+)\}\})/g, expand);
+    } else {
       this.expandVariables(contentOnly, content[i].content, expandResult);
     }
   }
 
-  function expand (match, escaped, unescapedMatch, property) {
-    var propertyName = property.trim()
-      , propertyValue
-      ;
+  function expand(match, escaped, unescapedMatch, property) {
+    var propertyName = property.trim(),
+      propertyValue;
 
     if (escaped) {
       return contentOnly ? match[0] : unescapedMatch;

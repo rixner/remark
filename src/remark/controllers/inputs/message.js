@@ -1,8 +1,8 @@
-exports.register = function (events) {
+exports.register = (events) => {
   addMessageEventListeners(events);
 };
 
-function addMessageEventListeners (events) {
+function addMessageEventListeners(events) {
   events.on('message', navigateByMessage);
 
   function navigateByMessage(message) {
@@ -10,9 +10,8 @@ function addMessageEventListeners (events) {
 
     if ((cap = /^gotoSlide:(\d+)$/.exec(message.data)) !== null) {
       events.emit('gotoSlide', parseInt(cap[1], 10), true);
-    }
-    else if (message.data === 'toggleBlackout') {
-      events.emit('toggleBlackout', {propagate: false});
+    } else if (message.data === 'toggleBlackout') {
+      events.emit('toggleBlackout', { propagate: false });
     }
   }
 }

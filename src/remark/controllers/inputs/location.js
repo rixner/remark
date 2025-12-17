@@ -1,10 +1,10 @@
 var utils = require('../../utils.js');
 
-exports.register = function (events, dom, slideshowView) {
+exports.register = (events, dom, slideshowView) => {
   addLocationEventListeners(events, dom, slideshowView);
 };
 
-function addLocationEventListeners (events, dom, slideshowView) {
+function addLocationEventListeners(events, dom, slideshowView) {
   // If slideshow is embedded into custom DOM element, we don't
   // hook up to location hash changes, so just go to first slide.
   if (slideshowView.isEmbedded()) {
@@ -21,16 +21,17 @@ function addLocationEventListeners (events, dom, slideshowView) {
     navigateByHash();
   }
 
-  function navigateByHash () {
+  function navigateByHash() {
     var slideNoOrName = (dom.getLocationHash() || '').substr(1);
     events.emit('gotoSlide', slideNoOrName);
   }
 
-  function updateHash (slideNoOrName) {
-    if(utils.hasClass(slideshowView.containerElement, 'remark-presenter-mode')){
+  function updateHash(slideNoOrName) {
+    if (
+      utils.hasClass(slideshowView.containerElement, 'remark-presenter-mode')
+    ) {
       dom.setLocationHash('#p' + slideNoOrName);
-    }
-    else{
+    } else {
       dom.setLocationHash('#' + slideNoOrName);
     }
   }

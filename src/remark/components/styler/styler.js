@@ -1,14 +1,13 @@
-var resources = require('../../resources')
-  , highlighter = require('../../highlighter')
-  ;
+var resources = require('../../resources'),
+  highlighter = require('../../highlighter');
 
 module.exports = {
-  styleDocument: styleDocument
-, setPageSize: setPageSize
+  styleDocument: styleDocument,
+  setPageSize: setPageSize
 };
 
 // Applies bundled styles to document
-function styleDocument () {
+function styleDocument() {
   var headElement, styleElement, style;
 
   // Bail out if document has already been styled
@@ -29,8 +28,8 @@ function styleDocument () {
   // Append highlighting styles
   for (style in highlighter.styles) {
     if (highlighter.styles.hasOwnProperty(style)) {
-      styleElement.innerHTML = styleElement.innerHTML +
-        highlighter.styles[style];
+      styleElement.innerHTML =
+        styleElement.innerHTML + highlighter.styles[style];
     }
   }
 
@@ -38,15 +37,14 @@ function styleDocument () {
   headElement.insertBefore(styleElement, headElement.firstChild);
 }
 
-function setPageSize (size) {
+function setPageSize(size) {
   var stylesheet = getRemarkStylesheet();
-  
+
   if (!stylesheet) {
     return;
   }
 
-  var pageRule = getPageRule(stylesheet)
-    ;
+  var pageRule = getPageRule(stylesheet);
 
   if (pageRule) {
     pageRule.style.size = size;
@@ -54,8 +52,9 @@ function setPageSize (size) {
 }
 
 // Locates the embedded remark stylesheet
-function getRemarkStylesheet () {
-  var i, l = document.styleSheets.length;
+function getRemarkStylesheet() {
+  var i,
+    l = document.styleSheets.length;
 
   for (i = 0; i < l; ++i) {
     if (document.styleSheets[i].title === 'remark') {
@@ -65,8 +64,9 @@ function getRemarkStylesheet () {
 }
 
 // Locates the CSS @page rule
-function getPageRule (stylesheet) {
-  var i, l = (stylesheet.cssRules || []).length;
+function getPageRule(stylesheet) {
+  var i,
+    l = (stylesheet.cssRules || []).length;
 
   for (i = 0; i < l; ++i) {
     if (stylesheet.cssRules[i] instanceof window.CSSPageRule) {

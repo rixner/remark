@@ -1,6 +1,6 @@
 const esbuild = require('esbuild');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const less = require('less');
 
 const outDir = path.join(__dirname, '../dist');
@@ -22,18 +22,18 @@ const lessLoader = {
         });
         return {
           contents: result.css,
-          loader: 'text',
+          loader: 'text'
         };
       } catch (e) {
         return { errors: [{ text: e.message }] };
       }
     });
-  },
+  }
 };
 
 async function build() {
   console.log('Bundling with esbuild...');
-  
+
   const commonOptions = {
     entryPoints: [path.join(__dirname, '../src/remark.js')],
     bundle: true,
@@ -41,24 +41,24 @@ async function build() {
       '.html': 'text',
       // No need for .css loader generally if we handle .less via plugin,
       // but keeping it for completeness if other css usage appears.
-      '.css': 'text' 
+      '.css': 'text'
     },
     plugins: [lessLoader],
     sourcemap: true,
-    target: ['es2015'] 
+    target: ['es2015']
   };
 
   // Build unminified
   await esbuild.build({
     ...commonOptions,
-    outfile: path.join(outDir, 'remark.js'),
+    outfile: path.join(outDir, 'remark.js')
   });
 
   // Build minified
   await esbuild.build({
     ...commonOptions,
     outfile: path.join(outDir, 'remark.min.js'),
-    minify: true,
+    minify: true
   });
 
   console.log('Build complete.');

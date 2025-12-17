@@ -5,11 +5,15 @@
 
 module.exports = {
   get engine() {
-    return window.hljs || {
-      highlightElement: function() {
-        console.warn('highlight.js not found. Code blocks will not be highlighted.');
+    return (
+      window.hljs || {
+        highlightElement: () => {
+          console.warn(
+            'highlight.js not found. Code blocks will not be highlighted.'
+          );
+        }
       }
-    };
+    );
   },
   styles: {}
 };

@@ -1,23 +1,22 @@
-exports.register = function (events, options) {
+exports.register = (events, options) => {
   addMouseEventListeners(events, options);
 };
 
-exports.unregister = function (events) {
+exports.unregister = (events) => {
   removeMouseEventListeners(events);
 };
 
-function addMouseEventListeners (events, options) {
+function addMouseEventListeners(events, options) {
   if (options.click) {
-    events.on('click', function (event) {
+    events.on('click', (event) => {
       if (event.target.nodeName === 'A') {
         // Don't interfere when clicking link
         return;
-      }
-      else if (event.button === 0) {
+      } else if (event.button === 0) {
         events.emit('gotoNextSlide');
       }
     });
-    events.on('contextmenu', function (event) {
+    events.on('contextmenu', (event) => {
       if (event.target.nodeName === 'A') {
         // Don't interfere when right-clicking link
         return;
@@ -28,11 +27,10 @@ function addMouseEventListeners (events, options) {
   }
 
   if (options.scroll !== false) {
-    var scrollHandler = function (event) {
+    var scrollHandler = (event) => {
       if (event.wheelDeltaY > 0 || event.detail < 0) {
         events.emit('gotoPreviousSlide');
-      }
-      else if (event.wheelDeltaY < 0 || event.detail > 0) {
+      } else if (event.wheelDeltaY < 0 || event.detail > 0) {
         events.emit('gotoNextSlide');
       }
     };

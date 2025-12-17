@@ -1,44 +1,38 @@
-exports.register = function (events, options) {
+exports.register = (events, options) => {
   addTouchEventListeners(events, options);
 };
 
-exports.unregister = function (events) {
+exports.unregister = (events) => {
   removeTouchEventListeners(events);
 };
 
-function addTouchEventListeners (events, options) {
-  var touch
-    , startX
-    , endX
-    ;
+function addTouchEventListeners(events, options) {
+  var touch, startX, endX;
 
   if (options.touch === false) {
     return;
   }
 
-  var isTap = function () {
-    return Math.abs(startX - endX) < 10;
-  };
+  var isTap = () => Math.abs(startX - endX) < 10;
 
-  var handleTap = function () {
+  var handleTap = () => {
     events.emit('tap', endX);
   };
 
-  var handleSwipe = function () {
+  var handleSwipe = () => {
     if (startX > endX) {
       events.emit('gotoNextSlide');
-    }
-    else {
+    } else {
       events.emit('gotoPreviousSlide');
     }
   };
 
-  events.on('touchstart', function (event) {
+  events.on('touchstart', (event) => {
     touch = event.touches[0];
     startX = touch.clientX;
   });
 
-  events.on('touchend', function (event) {
+  events.on('touchend', (event) => {
     if (event.target.nodeName.toUpperCase() === 'A') {
       return;
     }
@@ -48,19 +42,18 @@ function addTouchEventListeners (events, options) {
 
     if (isTap()) {
       handleTap();
-    }
-    else {
+    } else {
       handleSwipe();
     }
   });
 
-  events.on('touchmove', function (event) {
+  events.on('touchmove', (event) => {
     event.preventDefault();
   });
 }
 
 function removeTouchEventListeners(events) {
-  events.removeAllListeners("touchstart");
-  events.removeAllListeners("touchend");
-  events.removeAllListeners("touchmove");
+  events.removeAllListeners('touchstart');
+  events.removeAllListeners('touchend');
+  events.removeAllListeners('touchmove');
 }

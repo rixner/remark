@@ -1,10 +1,9 @@
 module.exports = Navigation;
 
-function Navigation (events) {
-  var self = this
-    , currentSlideIndex = -1
-    , started = null
-    ;
+function Navigation(events) {
+  var self = this,
+    currentSlideIndex = -1,
+    started = null;
 
   self.getCurrentSlideIndex = getCurrentSlideIndex;
   self.gotoSlide = gotoSlide;
@@ -23,41 +22,43 @@ function Navigation (events) {
   events.on('gotoFirstSlide', gotoFirstSlide);
   events.on('gotoLastSlide', gotoLastSlide);
 
-  events.on('slidesChanged', function () {
+  events.on('slidesChanged', () => {
     if (currentSlideIndex > self.getSlideCount()) {
       currentSlideIndex = self.getSlideCount();
     }
   });
 
-  events.on('createClone', function () {
+  events.on('createClone', () => {
     if (!self.clone || self.clone.closed) {
-      self.clone = window.open(location.href, self.getCloneTarget(), 'location=no');
-    }
-    else {
+      self.clone = window.open(
+        location.href,
+        self.getCloneTarget(),
+        'location=no'
+      );
+    } else {
       self.clone.focus();
     }
   });
 
-  events.on('resetTimer', function() {
+  events.on('resetTimer', () => {
     started = false;
   });
 
-  function pause () {
+  function pause() {
     events.emit('pause');
   }
 
-  function resume () {
+  function resume() {
     events.emit('resume');
   }
 
-  function getCurrentSlideIndex () {
+  function getCurrentSlideIndex() {
     return currentSlideIndex;
   }
 
   function gotoSlideByIndex(slideIndex, noMessage) {
-    var alreadyOnSlide = slideIndex === currentSlideIndex
-      , slideOutOfRange = slideIndex < 0 || slideIndex > self.getSlideCount()-1
-      ;
+    var alreadyOnSlide = slideIndex === currentSlideIndex,
+      slideOutOfRange = slideIndex < 0 || slideIndex > self.getSlideCount() - 1;
 
     if (noMessage === undefined) noMessage = false;
 
@@ -99,13 +100,13 @@ function Navigation (events) {
     }
   }
 
-  function gotoSlide (slideNoOrName, noMessage) {
+  function gotoSlide(slideNoOrName, noMessage) {
     var slideIndex = getSlideIndex(slideNoOrName);
 
     gotoSlideByIndex(slideIndex, noMessage);
   }
 
-  function gotoSlideNumber (slideNumber, noMessage) {
+  function gotoSlideNumber(slideNumber, noMessage) {
     var slides = self.getSlidesByNumber(parseInt(slideNumber, 10));
     if (slides && slides.length) {
       gotoSlideByIndex(slides[0].getSlideIndex(), noMessage);
@@ -120,18 +121,16 @@ function Navigation (events) {
     gotoSlideByIndex(currentSlideIndex + 1);
   }
 
-  function gotoFirstSlide () {
+  function gotoFirstSlide() {
     gotoSlideByIndex(0);
   }
 
-  function gotoLastSlide () {
+  function gotoLastSlide() {
     gotoSlideByIndex(self.getSlideCount() - 1);
   }
 
-  function getSlideIndex (slideNoOrName) {
-    var slideNo
-      , slide
-      ;
+  function getSlideIndex(slideNoOrName) {
+    var slideNo, slide;
 
     if (typeof slideNoOrName === 'number') {
       return slideNoOrName - 1;
@@ -142,9 +141,9 @@ function Navigation (events) {
       return slideNo - 1;
     }
 
-    if(slideNoOrName.match(/^p\d+$/)){
+    if (slideNoOrName.match(/^p\d+$/)) {
       events.emit('forcePresenterMode');
-      return parseInt(slideNoOrName.substr(1), 10)-1;
+      return parseInt(slideNoOrName.substr(1), 10) - 1;
     }
 
     slide = self.getSlideByName(slideNoOrName);

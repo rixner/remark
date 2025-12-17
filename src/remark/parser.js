@@ -2,7 +2,7 @@ var Lexer = require('./lexer');
 
 module.exports = Parser;
 
-function Parser () { }
+function Parser() {}
 
 /*
  *  Parses source string into list of slides.
@@ -36,19 +36,17 @@ function Parser () { }
  *  ]
  */
 Parser.prototype.parse = function (src, macros, options) {
-  var self = this,
-      lexer = new Lexer(),
-      tokens = lexer.lex(cleanInput(src, options)),
-      slides = [],
-
-      // The last item on the stack contains the current slide or
-      // content class we're currently appending content to.
-      stack = [createSlide()];
+  var lexer = new Lexer(),
+    tokens = lexer.lex(cleanInput(src, options)),
+    slides = [],
+    // The last item on the stack contains the current slide or
+    // content class we're currently appending content to.
+    stack = [createSlide()];
 
   macros = macros || {};
   options = options || {};
 
-  tokens.forEach(function (token) {
+  tokens.forEach((token) => {
     switch (token.type) {
       case 'text':
       case 'code':
@@ -66,24 +64,31 @@ Parser.prototype.parse = function (src, macros, options) {
           title: token.title
         };
         break;
-      case 'macro':
+      case 'macro': {
         // Macro
         var macro = macros[token.name];
         if (typeof macro !== 'function') {
-          throw new Error('Macro "' + token.name + '" not found. ' +
-              'You need to define macro using remark.macros[\'' +
-              token.name + '\'] = function () { ... };');
+          throw new Error(
+            'Macro "' +
+              token.name +
+              '" not found. ' +
+              "You need to define macro using remark.macros['" +
+              token.name +
+              "'] = function () { ... };"
+          );
         }
         var value = macro.apply(token.obj, token.args);
         if (typeof value === 'string') {
-          value = self.parse(value, macros);
+          value = this.parse(value, macros);
           appendTo(stack[stack.length - 1], value[0].content[0]);
-        }
-        else {
-          appendTo(stack[stack.length - 1], value === undefined ?
-              '' : value.toString());
+        } else {
+          appendTo(
+            stack[stack.length - 1],
+            value === undefined ? '' : value.toString()
+          );
         }
         break;
+      }
       case 'content_start':
         // Entering content class, so create stack entry for appending
         // upcoming content to.
@@ -103,8 +108,7 @@ Parser.prototype.parse = function (src, macros, options) {
         if (token.text === '--' && options.disableIncrementalSlides === true) {
           // If it happens that there was a note section right before, just get
           // rid of it
-          if (stack[0].notes !== undefined)
-            delete(stack[0].notes);
+          if (stack[0].notes !== undefined) delete stack[0].notes;
           break;
         }
         // Slide separator (--- or --), so add current slide to list of
@@ -126,11 +130,14 @@ Parser.prototype.parse = function (src, macros, options) {
   // Push current slide to list of slides.
   slides.push(stack[0]);
 
-  slides.forEach(function (slide) {
-    slide.content[0] = extractProperties(slide.content[0] || '', slide.properties);
+  slides.forEach((slide) => {
+    slide.content[0] = extractProperties(
+      slide.content[0] || '',
+      slide.properties
+    );
   });
 
-  return slides.filter(function (slide) {
+  return slides.filter((slide) => {
     var exclude = (slide.properties.exclude || '').toLowerCase();
 
     if (exclude === 'true') {
@@ -141,7 +148,7 @@ Parser.prototype.parse = function (src, macros, options) {
   });
 };
 
-function createSlide () {
+function createSlide() {
   return {
     content: [],
     properties: {
@@ -151,7 +158,7 @@ function createSlide () {
   };
 }
 
-function createContentClass (token) {
+function createContentClass(token) {
   return {
     class: token.classes.join(' '),
     block: token.block,
@@ -159,7 +166,7 @@ function createContentClass (token) {
   };
 }
 
-function appendTo (element, content) {
+function appendTo(element, content) {
   var target = element.content;
 
   if (element.notes !== undefined) {
@@ -171,25 +178,24 @@ function appendTo (element, content) {
   var lastIdx = target.length - 1;
   if (typeof target[lastIdx] === 'string' && typeof content === 'string') {
     target[lastIdx] += content;
-  }
-  else {
+  } else {
     target.push(content);
   }
 }
 
-function extractProperties (source, properties) {
-  var propertyFinder = /^\n*([-\w]+):([^$\n]*)|\n*(?:<!--\s*)([-\w]+):([^$\n]*?)(?:\s*-->)/i
-    , match
-    ;
+function extractProperties(source, properties) {
+  var propertyFinder =
+      /^\n*([-\w]+):([^$\n]*)|\n*(?:<!--\s*)([-\w]+):([^$\n]*?)(?:\s*-->)/i,
+    match;
 
   while ((match = propertyFinder.exec(source)) !== null) {
-    source = source.substr(0, match.index) +
+    source =
+      source.substr(0, match.index) +
       source.substr(match.index + match[0].length);
 
     if (match[1] !== undefined) {
       properties[match[1].trim()] = match[2].trim();
-    }
-    else {
+    } else {
       properties[match[3].trim()] = match[4].trim();
     }
 
@@ -203,30 +209,32 @@ function cleanInput(source, options) {
   var tabReplacements = (options || {}).tabReplacements || 4;
 
   // Normalize leading tabs to spaces
-  source = source.replace(/^[ \t]+/gm, function (match) {
-    return match.replace(/\t/g, new Array(tabReplacements + 1).join(' '));
-  });
+  source = source.replace(/^[ \t]+/gm, (match) =>
+    match.replace(/\t/g, new Array(tabReplacements + 1).join(' '))
+  );
 
   // If all lines are indented, we should trim them all to the same point so that code doesn't
   // need to start at column 0 in the source (see GitHub Issue #105)
 
   // Helper to extract captures from the regex
-  var getMatchCaptures = function (source, pattern) {
-    var results = [], match;
-    while ((match = pattern.exec(source)) !== null)
-      results.push(match[1]);
+  var getMatchCaptures = (source, pattern) => {
+    var results = [],
+      match;
+    while ((match = pattern.exec(source)) !== null) results.push(match[1]);
     return results;
   };
 
   // Calculate the minimum leading whitespace
   // Ensure there's at least one char that's not newline nor whitespace to ignore empty and blank lines
   var leadingWhitespacePattern = /^([ ]*)[^ \n]/gm;
-  var whitespace = getMatchCaptures(source, leadingWhitespacePattern).map(function (s) { return s.length; });
+  var whitespace = getMatchCaptures(source, leadingWhitespacePattern).map(
+    (s) => s.length
+  );
   var minWhitespace = Math.min.apply(Math, whitespace);
-  
+
   // If no lines match (empty file or all blank lines), don't strip anything
   if (whitespace.length === 0) {
-      return source;
+    return source;
   }
 
   // Trim off the exact amount of whitespace, or less for blank lines (non-empty)

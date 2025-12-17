@@ -1,51 +1,54 @@
 module.exports = Lexer;
 
 var CODE = 1,
-    INLINE_CODE = 2,
-    CONTENT = 3,
-    FENCES = 4,
-    DEF = 5,
-    DEF_HREF = 6,
-    DEF_TITLE = 7,
-    MACRO = 8,
-    MACRO_ARGS = 9,
-    MACRO_OBJ = 10,
-    SLIDE_SEPARATOR = 11,
-    FRAGMENT_SEPARATOR = 12,
-    NOTES_SEPARATOR = 13;
+  INLINE_CODE = 2,
+  CONTENT = 3,
+  FENCES = 4,
+  DEF = 5,
+  DEF_HREF = 6,
+  DEF_TITLE = 7,
+  MACRO = 8,
+  MACRO_ARGS = 9,
+  MACRO_OBJ = 10,
+  SLIDE_SEPARATOR = 11,
+  FRAGMENT_SEPARATOR = 12,
+  NOTES_SEPARATOR = 13;
 
 var regexByName = {
-    CODE: /(?:^|\n\n)( {4}[^\n]+\n*)+/,
-    INLINE_CODE: /\`([^\`].*?)\`/,
-    CONTENT: /(?:\\)?((?:\.[a-zA-Z_\-][a-zA-Z\-_0-9]*)+)\[/,
-    FENCES: /(?:^|\n) *(`{3,}|~{3,}) *(?:\S+)? *\n(?:[\s\S]+?)\s*\4 *(?:\n+|$)/,
-    DEF: /(?:^|\n) *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
-    MACRO: /!\[:([^\] ]+)([^\]]*)\](?:\(([^\)]*)\))?/,
-    SLIDE_SEPARATOR: /(?:^|\n)(---|<!--\s*break\s*-->)(?:\n|$)/,
-    FRAGMENT_SEPARATOR: /(?:^|\n)(--)(?![^\n])/,
-    NOTES_SEPARATOR: /(?:^|\n)(\?{3})(?:\n|$)/
-  };
+  CODE: /(?:^|\n\n)( {4}[^\n]+\n*)+/,
+  INLINE_CODE: /`([^`].*?)`/,
+  CONTENT: /(?:\\)?((?:\.[a-zA-Z_-][a-zA-Z\-_0-9]*)+)\[/,
+  FENCES: /(?:^|\n) *(`{3,}|~{3,}) *(?:\S+)? *\n(?:[\s\S]+?)\s*\4 *(?:\n+|$)/,
+  DEF: /(?:^|\n) *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
+  MACRO: /!\[:([^\] ]+)([^\]]*)\](?:\(([^)]*)\))?/,
+  SLIDE_SEPARATOR: /(?:^|\n)(---|<!--\s*break\s*-->)(?:\n|$)/,
+  FRAGMENT_SEPARATOR: /(?:^|\n)(--)(?![^\n])/,
+  NOTES_SEPARATOR: /(?:^|\n)(\?{3})(?:\n|$)/
+};
 
-var block = replace(/CODE|INLINE_CODE|CONTENT|FENCES|DEF|MACRO|SLIDE_SEPARATOR|FRAGMENT_SEPARATOR|NOTES_SEPARATOR/, regexByName),
-    inline = replace(/CODE|INLINE_CODE|CONTENT|FENCES|DEF|MACRO/, regexByName);
+var block = replace(
+    /CODE|INLINE_CODE|CONTENT|FENCES|DEF|MACRO|SLIDE_SEPARATOR|FRAGMENT_SEPARATOR|NOTES_SEPARATOR/,
+    regexByName
+  ),
+  inline = replace(/CODE|INLINE_CODE|CONTENT|FENCES|DEF|MACRO/, regexByName);
 
-function Lexer () { }
+function Lexer() {}
 
-Lexer.prototype.lex = function (src) {
+Lexer.prototype.lex = (src) => {
   var tokens = lex(src.replace('\r', ''), block),
-      i;
+    i;
 
   for (i = tokens.length - 2; i >= 0; i--) {
-    if (tokens[i].type === 'text' && tokens[i+1].type === 'text') {
-      tokens[i].text += tokens[i+1].text;
-      tokens.splice(i+1, 1);
+    if (tokens[i].type === 'text' && tokens[i + 1].type === 'text') {
+      tokens[i].text += tokens[i + 1].text;
+      tokens.splice(i + 1, 1);
     }
   }
 
   return tokens;
 };
 
-function lex (src, regex, tokens) {
+function lex(src, regex, tokens) {
   var cap, text;
 
   tokens = tokens || [];
@@ -63,48 +66,41 @@ function lex (src, regex, tokens) {
         type: 'code',
         text: cap[0]
       });
-    }
-    else if (cap[INLINE_CODE]) {
+    } else if (cap[INLINE_CODE]) {
       tokens.push({
         type: 'text',
         text: cap[0]
       });
-    }
-    else if (cap[FENCES]) {
+    } else if (cap[FENCES]) {
       tokens.push({
         type: 'fences',
         text: cap[0]
       });
-    }
-    else if (cap[DEF]) {
+    } else if (cap[DEF]) {
       tokens.push({
         type: 'def',
         id: cap[DEF].toLowerCase(),
         href: cap[DEF_HREF],
         title: cap[DEF_TITLE]
       });
-    }
-    else if (cap[MACRO]) {
+    } else if (cap[MACRO]) {
       tokens.push({
         type: 'macro',
         name: cap[MACRO],
         args: (cap[MACRO_ARGS] || '').split(',').map(trim),
         obj: cap[MACRO_OBJ]
       });
-    }
-    else if (cap[SLIDE_SEPARATOR] || cap[FRAGMENT_SEPARATOR]) {
+    } else if (cap[SLIDE_SEPARATOR] || cap[FRAGMENT_SEPARATOR]) {
       tokens.push({
         type: 'separator',
         text: cap[SLIDE_SEPARATOR] || cap[FRAGMENT_SEPARATOR]
       });
-    }
-    else if (cap[NOTES_SEPARATOR]) {
+    } else if (cap[NOTES_SEPARATOR]) {
       tokens.push({
         type: 'notes_separator',
         text: cap[NOTES_SEPARATOR]
       });
-    }
-    else if (cap[CONTENT]) {
+    } else if (cap[CONTENT]) {
       text = getTextInBrackets(src, cap.index + cap[0].length);
       if (text !== undefined) {
         src = src.substring(text.length + 1);
@@ -120,15 +116,13 @@ function lex (src, regex, tokens) {
             type: 'content_end',
             block: text.indexOf('\n') !== -1
           });
-        }
-        else {
+        } else {
           tokens.push({
             type: 'text',
             text: cap[0].substring(1) + text + ']'
           });
         }
-      }
-      else {
+      } else {
         tokens.push({
           type: 'text',
           text: cap[0]
@@ -149,13 +143,13 @@ function lex (src, regex, tokens) {
   return tokens;
 }
 
-function replace (regex, replacements) {
-  return new RegExp(regex.source.replace(/\w{2,}/g, function (key) {
-    return replacements[key].source;
-  }));
+function replace(regex, replacements) {
+  return new RegExp(
+    regex.source.replace(/\w{2,}/g, (key) => replacements[key].source)
+  );
 }
 
-function trim (text) {
+function trim(text) {
   if (typeof text === 'string') {
     return text.trim();
   }
@@ -163,10 +157,10 @@ function trim (text) {
   return text;
 }
 
-function getTextInBrackets (src, offset) {
+function getTextInBrackets(src, offset) {
   var depth = 1,
-      pos = offset,
-      chr;
+    pos = offset,
+    chr;
 
   while (depth > 0 && pos < src.length) {
     chr = src[pos++];

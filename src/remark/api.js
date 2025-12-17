@@ -1,18 +1,17 @@
-var EventEmitter = require('events').EventEmitter
-  , highlighter = require('./highlighter')
-  , converter = require('./converter')
-  , resources = require('./resources')
-  , Parser = require('./parser')
-  , Slideshow = require('./models/slideshow')
-  , SlideshowView = require('./views/slideshowView')
-  , DefaultController = require('./controllers/defaultController')
-  , Dom = require('./dom')
-  , macros = require('./macros')
-  ;
+var EventEmitter = require('events').EventEmitter,
+  highlighter = require('./highlighter'),
+  converter = require('./converter'),
+  resources = require('./resources'),
+  Parser = require('./parser'),
+  Slideshow = require('./models/slideshow'),
+  SlideshowView = require('./views/slideshowView'),
+  DefaultController = require('./controllers/defaultController'),
+  Dom = require('./dom'),
+  macros = require('./macros');
 
 module.exports = Api;
 
-function Api (dom) {
+function Api(dom) {
   this.dom = dom || new Dom();
   this.macros = macros;
   this.version = resources.version;
@@ -22,31 +21,32 @@ function Api (dom) {
 // including external language grammars
 Api.prototype.highlighter = highlighter;
 
-Api.prototype.convert = function (markdown) {
-  var parser = new Parser()
-    , content = parser.parse(markdown || '', macros)[0].content
-    ;
+Api.prototype.convert = (markdown) => {
+  var parser = new Parser(),
+    content = parser.parse(markdown || '', macros)[0].content;
 
   return converter.convertMarkdown(content, {}, true);
 };
 
 // Creates slideshow initialized from options
 Api.prototype.create = function (options, callback) {
-  var self = this
-    , events
-    , slideshow
-    , slideshowView
-    , controller
-    ;
+  var events, slideshow, slideshowView, controller;
 
   options = applyDefaults(this.dom, options);
 
   events = new EventEmitter();
   events.setMaxListeners(0);
 
-  slideshow = new Slideshow(events, this.dom, options, function (slideshow) {
-    slideshowView = new SlideshowView(events, self.dom, options, slideshow);
-    controller = options.controller || new DefaultController(events, self.dom, slideshowView, options.navigation);
+  slideshow = new Slideshow(events, this.dom, options, (slideshow) => {
+    slideshowView = new SlideshowView(events, this.dom, options, slideshow);
+    controller =
+      options.controller ||
+      new DefaultController(
+        events,
+        this.dom,
+        slideshowView,
+        options.navigation
+      );
     if (typeof callback === 'function') {
       callback(slideshow);
     }
@@ -55,7 +55,7 @@ Api.prototype.create = function (options, callback) {
   return slideshow;
 };
 
-function applyDefaults (dom, options) {
+function applyDefaults(dom, options) {
   var sourceElement;
 
   options = options || {};
@@ -75,11 +75,10 @@ function applyDefaults (dom, options) {
   return options;
 }
 
-function unescape (source) {
-  source = source.replace(/&[l|g]t;/g,
-    function (match) {
-      return match === '&lt;' ? '<' : '>';
-    });
+function unescape(source) {
+  source = source.replace(/&[l|g]t;/g, (match) =>
+    match === '&lt;' ? '<' : '>'
+  );
 
   source = source.replace(/&amp;/g, '&');
   source = source.replace(/&quot;/g, '"');
